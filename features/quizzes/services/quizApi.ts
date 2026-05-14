@@ -1,6 +1,10 @@
 import { ApiAxios } from "@utils/axios";
-import { Quiz, ApiQuizzesResponse, QuizLevel } from "../types";
+import { Quiz, ApiQuizzesResponse, QuizLevel, QuizQuestion } from "../types";
 import { ApiResponse } from "@/lib/types";
+
+// # ========================================================
+// # = Quiz API
+// # ========================================================
 
 export async function getQuizzes(materialId: string): Promise<Quiz[]> {
   const { data: result } = await ApiAxios.get<ApiQuizzesResponse>(
@@ -60,6 +64,9 @@ export async function deleteQuiz(id: string): Promise<{ message: string }> {
   };
 }
 
+// # ========================================================
+// # = Quiz Level API
+// # ========================================================
 export async function getQuizLevels(quizId: string): Promise<QuizLevel[]> {
   const { data: result } = await ApiAxios.get<ApiResponse<QuizLevel[]>>(
     `/quizzes/levels?quizId=${quizId}`,
@@ -116,6 +123,69 @@ export async function deleteQuizLevel(
 ): Promise<{ message: string }> {
   const { data: result } = await ApiAxios.delete<ApiResponse<any>>(
     `/quizzes/levels/${id}`,
+  );
+
+  return {
+    message: result.message,
+  };
+}
+
+// # ========================================================
+// # = Quiz Question API
+// # ========================================================
+export async function getQuizQuestions(
+  quizLevelId: string,
+): Promise<QuizQuestion[]> {
+  const { data: result } = await ApiAxios.get<ApiResponse<QuizQuestion[]>>(
+    `/quizzes/questions?quizLevelId=${quizLevelId}`,
+  );
+
+  return result.data;
+}
+
+export async function createQuizQuestion(data: {
+  quizLevelId: string;
+  questionText: string;
+  answerText: string;
+  maxScore: number;
+  questionOrder: number;
+}): Promise<{ question: QuizQuestion; message: string }> {
+  const { data: result } = await ApiAxios.post<ApiResponse<QuizQuestion>>(
+    "/quizzes/questions",
+    data,
+  );
+
+  return {
+    question: result.data,
+    message: result.message,
+  };
+}
+
+export async function updateQuizQuestion(
+  id: string,
+  data: {
+    questionText?: string;
+    answerText?: string;
+    maxScore?: number;
+    questionOrder?: number;
+  },
+): Promise<{ question: QuizQuestion; message: string }> {
+  const { data: result } = await ApiAxios.patch<ApiResponse<QuizQuestion>>(
+    `/quizzes/questions/${id}`,
+    data,
+  );
+
+  return {
+    question: result.data,
+    message: result.message,
+  };
+}
+
+export async function deleteQuizQuestion(
+  id: string,
+): Promise<{ message: string }> {
+  const { data: result } = await ApiAxios.delete<ApiResponse<any>>(
+    `/quizzes/questions/${id}`,
   );
 
   return {

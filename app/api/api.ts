@@ -49,5 +49,11 @@ export const API_ENDPOINTS = {
     GET_LEVEL: (id: string) => `${API_URL}/quizzes/levels/${id}`,
     UPDATE_LEVEL: (id: string) => `${API_URL}/quizzes/levels/${id}`,
     DELETE_LEVEL: (id: string) => `${API_URL}/quizzes/levels/${id}`,
+
+    QUESTIONS: (quizLevelId: string) =>
+      `${API_URL}/quizzes/questions?quizLevelId=${quizLevelId}`,
+    CREATE_QUESTION: () => `${API_URL}/quizzes/questions`,
+    UPDATE_QUESTION: (id: string) => `${API_URL}/quizzes/questions/${id}`,
+    DELETE_QUESTION: (id: string) => `${API_URL}/quizzes/questions/${id}`,
   },
 };
