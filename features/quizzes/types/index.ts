@@ -25,4 +25,19 @@ export interface Quiz {
   levels: QuizLevel[];
 }
 
+export interface QuizQuestion {
+  id: string;
+  quizLevelId: string;
+  quizLevelTitle: string;
+  quizId: string;
+  quizTitle: string;
+  questionText: string;
+  answerText: string;
+  maxScore: number;
+  questionOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type ApiQuizzesResponse = ApiResponse<Quiz[]>;
+export type ApiQuestionsResponse = ApiResponse<QuizQuestion[]>;

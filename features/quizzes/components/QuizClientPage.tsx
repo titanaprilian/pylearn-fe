@@ -8,6 +8,7 @@ import { Plus, BookOpen, Eye, HelpCircle } from "lucide-react";
 import { Quiz } from "@/features/quizzes/types";
 import Link from "next/link";
 import QuizCard from "./QuizCard";
+import QuizQuestionDashboard from "./QuizQuestionDashboard"; // Impor dashboard pertanyaan
 
 interface QuizClientPageProps {
   materialId: string;
@@ -73,9 +74,20 @@ function QuizClientPage({ materialId, materialTitle }: QuizClientPageProps) {
             <Skeleton className="h-40 w-full rounded-xl" />
           </div>
         ) : hasQuiz ? (
-          <div className="grid gap-6 grid-cols-1">
+          <div className="space-y-10">
             {quizzes.map((quiz: Quiz) => (
-              <QuizCard key={quiz.id} quiz={quiz} materialId={materialId} />
+              <div key={quiz.id} className="space-y-10">
+                {/* 1. RENDER KARTU UTAMA KUIS (DI ATAS) */}
+                <QuizCard quiz={quiz} materialId={materialId} />
+
+                {/* 2. RENDER LANGSUNG PANEL PERTANYAAN (DI BAWAHNYA) */}
+                <div className="border-t pt-6">
+                  <QuizQuestionDashboard
+                    materialId={materialId}
+                    materialTitle={materialTitle}
+                  />
+                </div>
+              </div>
             ))}
           </div>
         ) : (
