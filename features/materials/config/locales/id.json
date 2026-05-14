@@ -51,6 +51,10 @@
     "create": {
       "title": "Materi Pembelajaran Baru",
       "description": "Isi detail untuk membuat materi baru."
+    },
+    "edit": {
+      "title": "Edit Materi Pembelajaran",
+      "description": "Perbarui detail materi pembelajaran Anda."
     }
   },
   "card": {

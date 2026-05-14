@@ -15,8 +15,21 @@ export const createMaterialSchema = z.object({
   description: z.string().optional(),
   materialType: z.enum(["text", "file", "video", "link"]),
   content: z.string().optional(),
+  sourceUrl: z.string().optional(),
   iconName: z.string().optional(),
   isPublished: z.boolean().default(false),
 });
 
 export type CreateMaterialRequest = z.infer<typeof createMaterialSchema>;
+
+export const updateMaterialSchema = z.object({
+  lecturerId: z.string().optional(),
+  title: z.string().optional(),
+  description: z.string().optional(),
+  content: z.string().optional(),
+  sourceUrl: z.string().optional(),
+  iconName: z.string().optional(),
+  isPublished: z.boolean().optional(),
+});
+
+export type UpdateMaterialRequest = z.infer<typeof updateMaterialSchema>;

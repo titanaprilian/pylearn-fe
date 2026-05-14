@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchMaterials, createMaterial } from "../services/materialsApi";
-import { MaterialFilters, MaterialsResponse, CreateMaterialRequest } from "../types";
+import { fetchMaterials, createMaterial, updateMaterial } from "../services/materialsApi";
+import { MaterialFilters, MaterialsResponse, CreateMaterialRequest, UpdateMaterialRequest } from "../types";
 import { toast } from "sonner";
 
 export const materialKeys = {
@@ -28,6 +28,22 @@ export function useCreateMaterial() {
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Failed to create material");
+    },
+  });
+}
+
+export function useUpdateMaterial() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateMaterialRequest }) =>
+      updateMaterial(id, data),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: materialKeys.all });
+      toast.success(data.message || "Material updated successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to update material");
     },
   });
 }

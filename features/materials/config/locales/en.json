@@ -51,6 +51,10 @@
     "create": {
       "title": "New Learning Material",
       "description": "Fill in the details to create a new material."
+    },
+    "edit": {
+      "title": "Edit Learning Material",
+      "description": "Update the details of your learning material."
     }
   },
   "card": {

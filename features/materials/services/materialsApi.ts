@@ -1,5 +1,5 @@
 import { ApiAxios } from "@utils/axios";
-import { CreateMaterialRequest, Material } from "../types";
+import { CreateMaterialRequest, UpdateMaterialRequest, Material } from "../types";
 import { MaterialFilters, MaterialsResponse, ApiMaterialsResponse } from "../types";
 
 export async function fetchMaterials(
@@ -38,9 +38,34 @@ export async function createMaterial(
     description: data.description,
     materialType: data.materialType,
     content: data.content,
+    sourceUrl: data.sourceUrl,
     iconName: data.iconName,
     isPublished: data.isPublished,
   });
+
+  return {
+    material: result.data,
+    message: result.message,
+  };
+}
+
+export async function updateMaterial(
+  id: string,
+  data: UpdateMaterialRequest,
+): Promise<{ material: Material; message: string }> {
+  const payload: Record<string, unknown> = {};
+  if (data.lecturerId !== undefined) payload.lecturerId = data.lecturerId;
+  if (data.title !== undefined) payload.title = data.title;
+  if (data.description !== undefined) payload.description = data.description;
+  if (data.content !== undefined) payload.content = data.content;
+  if (data.sourceUrl !== undefined) payload.sourceUrl = data.sourceUrl;
+  if (data.iconName !== undefined) payload.iconName = data.iconName;
+  if (data.isPublished !== undefined) payload.isPublished = data.isPublished;
+
+  const { data: result } = await ApiAxios.patch<{
+    data: Material;
+    message: string;
+  }>(`/materials/${id}`, payload);
 
   return {
     material: result.data,

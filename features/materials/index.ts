@@ -12,3 +12,4 @@ export { MaterialsList } from "./components/MaterialsList";
 export { MaterialCard } from "./components/MaterialCard";
 export { MaterialForm } from "./components/MaterialForm";
 export { CreateMaterialDialog } from "./components/CreateMaterialDialog";
+export { EditMaterialDialog } from "./components/EditMaterialDialog";

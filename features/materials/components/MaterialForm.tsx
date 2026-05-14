@@ -4,7 +4,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   createMaterialSchema,
+  updateMaterialSchema,
   CreateMaterialRequest,
+  UpdateMaterialRequest,
 } from "../schemas/materialSchema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,17 +16,21 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/spinner";
 import { useTranslations } from "@/lib/i18n/useTranslation";
 import { IconPicker } from "./IconPicker";
+import { useEffect } from "react";
 
 interface MaterialFormProps {
-  onSubmit: (data: CreateMaterialRequest) => void;
+  initialValues?: Partial<UpdateMaterialRequest>;
+  onSubmit: (data: any) => void;
   isLoading?: boolean;
 }
 
-export function MaterialForm({ onSubmit, isLoading }: MaterialFormProps) {
+export function MaterialForm({ initialValues, onSubmit, isLoading }: MaterialFormProps) {
   const t = useTranslations();
-  const form = useForm<CreateMaterialRequest>({
-    resolver: zodResolver(createMaterialSchema),
-    defaultValues: {
+  const isEdit = !!initialValues;
+
+  const form = useForm<any>({
+    resolver: zodResolver(isEdit ? updateMaterialSchema : createMaterialSchema),
+    defaultValues: initialValues || {
       title: "",
       description: "",
       materialType: "text",
@@ -33,6 +39,12 @@ export function MaterialForm({ onSubmit, isLoading }: MaterialFormProps) {
       isPublished: false,
     },
   });
+
+  useEffect(() => {
+    if (initialValues) {
+      form.reset(initialValues);
+    }
+  }, [initialValues, form]);
 
   return (
     <form

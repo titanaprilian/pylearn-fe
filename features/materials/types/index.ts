@@ -1,5 +1,5 @@
 import { ApiErrorResponse } from "@/lib/types";
-import { CreateMaterialRequest } from "../schemas/materialSchema";
+import { CreateMaterialRequest, UpdateMaterialRequest } from "../schemas/materialSchema";
 
 export type { ApiErrorResponse };
 
