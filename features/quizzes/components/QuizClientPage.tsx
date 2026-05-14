@@ -1,17 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import {
-  useCreateLevel,
-  useFetchLevels,
-  useFetchQuizzesByLevel,
-} from "@/features/quizzes/hooks/useQuiz";
+import { useFetchQuizzes } from "@/features/quizzes/hooks/useQuizzes";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle } from "lucide-react";
-import { Level, Quiz } from "@/features/quizzes/types";
+import { Card, CardContent } from "@/components/ui/card";
+import { Plus, BookOpen, Eye, HelpCircle } from "lucide-react";
+import { Quiz } from "@/features/quizzes/types";
+import Link from "next/link";
+import QuizCard from "./QuizCard";
 
 interface QuizClientPageProps {
   materialId: string;
@@ -19,91 +15,86 @@ interface QuizClientPageProps {
 }
 
 function QuizClientPage({ materialId, materialTitle }: QuizClientPageProps) {
-  const [selectedLevelId, setSelectedLevelId] = useState<string | null>(null);
-
-  const { data: levels, isLoading: areLevelsLoading } =
-    useFetchLevels(materialId);
-
-  const { mutate: createLevel, isPending: isCreatingLevel } =
-    useCreateLevel(materialId);
-
   const { data: quizzes, isLoading: areQuizzesLoading } =
-    useFetchQuizzesByLevel(selectedLevelId);
+    useFetchQuizzes(materialId);
 
-  const handleSelectLevel = (levelId: string) => {
-    setSelectedLevelId(levelId === selectedLevelId ? null : levelId);
-  };
+  const hasQuiz = quizzes && quizzes.length > 0;
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Quiz for: {materialTitle?.trim() || "Material"}</CardTitle>
-        </CardHeader>
-      </Card>
+    <div className="space-y-6 max-w-5xl mx-auto p-2">
+      {/* Header Panel */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-5">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2.5 text-muted-foreground">
+            <BookOpen className="h-5 w-5 text-primary animate-pulse" />
+            <span className="text-sm font-semibold tracking-wider uppercase">
+              Modul Pembelajaran
+            </span>
+          </div>
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-card-foreground">
+            Materi: {materialTitle?.trim() || "Detail Materi"}
+          </h1>
+          <p className="text-sm text-muted-foreground max-w-2xl">
+            Atur parameter, kelola batas lini waktu pengerjaan, dan tambahkan
+            tingkatan (levels) pertanyaan esai adaptif untuk modul pembelajaran
+            saat ini.
+          </p>
+        </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Levels</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-2">
-          {areLevelsLoading ? (
-            <>
-              <Skeleton className="h-6 w-20 rounded-full" />
-              <Skeleton className="h-6 w-20 rounded-full" />
-            </>
-          ) : (
-            levels?.map((level: Level) => (
-              <Badge
-                key={level.id}
-                variant={selectedLevelId === level.id ? "default" : "secondary"}
-                onClick={() => handleSelectLevel(level.id)}
-                className="cursor-pointer text-sm"
-              >
-                {level.title || `Level ${level.id.substring(0, 4)}`}
-              </Badge>
-            ))
-          )}
+        {!areQuizzesLoading && !hasQuiz && (
           <Button
-            variant="outline"
-            size="sm"
-            className="rounded-full"
-            onClick={() => createLevel()}
-            disabled={isCreatingLevel}
+            asChild
+            size="default"
+            className="shadow-sm font-medium shrink-0"
           >
-            <PlusCircle className="h-4 w-4 mr-2" />
-            {isCreatingLevel ? "Generating..." : "Generate Level"}
+            <Link
+              href={`/materials/${materialId}/quiz/create?title=${encodeURIComponent(
+                materialTitle || "",
+              )}`}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Buat Kuis Baru
+            </Link>
           </Button>
-        </CardContent>
-      </Card>
+        )}
+      </div>
 
-      {selectedLevelId && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Quizzes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {areQuizzesLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-5/6" />
+      {/* Konten Utama Dashboard */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <HelpCircle className="h-4 w-4 text-muted-foreground" />
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+            Konfigurasi Evaluasi Aktif
+          </h2>
+        </div>
+
+        {areQuizzesLoading ? (
+          <div className="grid gap-4 grid-cols-1">
+            <Skeleton className="h-40 w-full rounded-xl" />
+          </div>
+        ) : hasQuiz ? (
+          <div className="grid gap-6 grid-cols-1">
+            {quizzes.map((quiz: Quiz) => (
+              <QuizCard key={quiz.id} quiz={quiz} materialId={materialId} />
+            ))}
+          </div>
+        ) : (
+          <Card className="border-dashed bg-muted/20 py-12">
+            <CardContent className="flex flex-col items-center justify-center space-y-3 text-center">
+              <Eye className="h-10 w-10 text-muted-foreground/60 stroke-[1.5]" />
+              <div className="space-y-1">
+                <p className="font-semibold text-muted-foreground">
+                  Evaluasi Belum Dibuat
+                </p>
+                <p className="text-sm text-muted-foreground/70 max-w-sm">
+                  Silakan buat kuis terlebih dahulu untuk mengaktifkan sesi
+                  evaluasi berjenjang pada materi ini.
+                </p>
               </div>
-            ) : quizzes && quizzes.length > 0 ? (
-              <ul className="space-y-2">
-                {quizzes.map((quiz: Quiz) => (
-                  <li key={quiz.id} className="p-2 border rounded-md">
-                    {quiz.title}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-muted-foreground">
-                No quizzes found for this level.
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
