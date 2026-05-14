@@ -4,7 +4,7 @@
   "users": "Usuarios",
   "roles": "Roles y Permisos",
   "settings": "Configuración",
-  "systemName": "RBAC Admin",
+  "systemName": "PyLearn",
   "systemVersion": "v1.0",
   "profile": "Perfil",
   "logout": "Cerrar Sesión"
