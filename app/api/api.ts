@@ -38,6 +38,16 @@ export const API_ENDPOINTS = {
     LEVELS: (id: string) => `${API_URL}/materials/${id}/levels`,
   },
   QUIZZES: {
-    LIST: (levelId: string) => `${API_URL}/quizzes/?levelId=${levelId}`,
+    LIST: (materialId: string) => `${API_URL}/quizzes?materialId=${materialId}`,
+    CREATE: () => `${API_URL}/quizzes`,
+    DETAIL: (id: string) => `${API_URL}/quizzes/${id}`,
+    UPDATE: (id: string) => `${API_URL}/quizzes/${id}`,
+    DELETE: (id: string) => `${API_URL}/quizzes/${id}`,
+
+    LEVELS: (quizId: string) => `${API_URL}/quizzes/levels?quizId=${quizId}`,
+    CREATE_LEVEL: () => `${API_URL}/quizzes/levels`,
+    GET_LEVEL: (id: string) => `${API_URL}/quizzes/levels/${id}`,
+    UPDATE_LEVEL: (id: string) => `${API_URL}/quizzes/levels/${id}`,
+    DELETE_LEVEL: (id: string) => `${API_URL}/quizzes/levels/${id}`,
   },
 };

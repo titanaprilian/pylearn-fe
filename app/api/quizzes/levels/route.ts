@@ -6,16 +6,16 @@ export async function GET(request: NextRequest) {
     const authHeader = request.headers.get("authorization");
     const acceptLanguage = request.headers.get("accept-language");
 
-    const materialId = request.nextUrl.searchParams.get("materialId");
+    const quizId = request.nextUrl.searchParams.get("quizId");
 
-    if (!materialId) {
+    if (!quizId) {
       return NextResponse.json(
-        { message: "materialId is required" },
+        { message: "quizId is required" },
         { status: 400 },
       );
     }
 
-    const response = await fetch(API_ENDPOINTS.QUIZZES.LIST(materialId), {
+    const response = await fetch(API_ENDPOINTS.QUIZZES.LEVELS(quizId), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -47,15 +47,15 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    const { materialId, title } = body;
-    if (!materialId || !title) {
+    const { quizId, title } = body;
+    if (!quizId || !title) {
       return NextResponse.json(
-        { message: "materialId and title are required fields" },
+        { message: "quizId and title are required fields" },
         { status: 400 },
       );
     }
 
-    const response = await fetch(API_ENDPOINTS.QUIZZES.CREATE(), {
+    const response = await fetch(API_ENDPOINTS.QUIZZES.CREATE_LEVEL(), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -72,7 +72,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(data, { status: response.status });
     }
 
-    // 4. Return the successfully created quiz data back to the client
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
     return NextResponse.json(
