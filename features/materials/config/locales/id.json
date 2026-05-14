@@ -55,6 +55,10 @@
     "edit": {
       "title": "Edit Materi Pembelajaran",
       "description": "Perbarui detail materi pembelajaran Anda."
+    },
+    "delete": {
+      "title": "Hapus Materi",
+      "description": "Apakah Anda yakin ingin menghapus \"{title}\"? Tindakan ini tidak dapat dibatalkan."
     }
   },
   "card": {

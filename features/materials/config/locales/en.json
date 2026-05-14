@@ -55,6 +55,10 @@
     "edit": {
       "title": "Edit Learning Material",
       "description": "Update the details of your learning material."
+    },
+    "delete": {
+      "title": "Delete Material",
+      "description": "Are you sure you want to delete \"{title}\"? This action cannot be undone."
     }
   },
   "card": {

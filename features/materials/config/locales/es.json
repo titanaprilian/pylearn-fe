@@ -55,6 +55,10 @@
     "edit": {
       "title": "Editar Material de Aprendizaje",
       "description": "Actualice los detalles de su material de aprendizaje."
+    },
+    "delete": {
+      "title": "Eliminar Material",
+      "description": "¿Está seguro de que desea eliminar \"{title}\"? Esta acción no se puede deshacer."
     }
   },
   "card": {

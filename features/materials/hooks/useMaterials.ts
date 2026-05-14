@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchMaterials, createMaterial, updateMaterial } from "../services/materialsApi";
+import { fetchMaterials, createMaterial, updateMaterial, deleteMaterial } from "../services/materialsApi";
 import { MaterialFilters, MaterialsResponse, CreateMaterialRequest, UpdateMaterialRequest } from "../types";
 import { toast } from "sonner";
 
@@ -44,6 +44,21 @@ export function useUpdateMaterial() {
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Failed to update material");
+    },
+  });
+}
+
+export function useDeleteMaterial() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => deleteMaterial(id),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: materialKeys.all });
+      toast.success(data.message || "Material deleted successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to delete material");
     },
   });
 }

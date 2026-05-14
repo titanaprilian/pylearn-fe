@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   createMaterialSchema,
@@ -16,6 +16,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/spinner";
 import { useTranslations } from "@/lib/i18n/useTranslation";
 import { IconPicker } from "./IconPicker";
+import { RichTextEditor } from "./RichTextEditor";
 import { useEffect } from "react";
 
 interface MaterialFormProps {
@@ -97,13 +98,23 @@ export function MaterialForm({ initialValues, onSubmit, isLoading }: MaterialFor
           <Label htmlFor="content" className="text-sm font-medium">
             {t("materials.form.content.label")}
           </Label>
-          <Textarea
-            id="content"
-            placeholder={t("materials.form.content.placeholder")}
-            className="min-h-[150px]"
-            {...form.register("content")}
-            disabled={isLoading}
+          <Controller
+            name="content"
+            control={form.control}
+            render={({ field }) => (
+              <RichTextEditor
+                value={field.value}
+                onChange={field.onChange}
+                placeholder={t("materials.form.content.placeholder")}
+                disabled={isLoading}
+              />
+            )}
           />
+          {form.formState.errors.content && (
+            <p className="text-xs text-destructive">
+              {form.formState.errors.content.message}
+            </p>
+          )}
         </div>
 
         <div className="flex items-center space-x-2 pt-2">

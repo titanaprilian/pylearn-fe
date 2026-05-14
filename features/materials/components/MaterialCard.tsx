@@ -6,9 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Material } from "../types";
 import { materialTypeIcons } from "../config/materials";
-import { Calendar, User, icons, Pencil } from "lucide-react";
+import { Calendar, User, icons, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EditMaterialDialog } from "./EditMaterialDialog";
+import { DeleteMaterialDialog } from "./DeleteMaterialDialog";
 
 interface MaterialCardProps {
   material: Material;
@@ -17,6 +18,7 @@ interface MaterialCardProps {
 export function MaterialCard({ material }: MaterialCardProps) {
   const t = useTranslations();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const TypeIcon =
     materialTypeIcons[material.materialType] || materialTypeIcons.text;
@@ -41,14 +43,22 @@ export function MaterialCard({ material }: MaterialCardProps) {
             </Badge>
           </div>
 
-          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <Button
               variant="secondary"
               size="icon"
-              className="h-8 w-8 rounded-full shadow-sm bg-background/80 backdrop-blur border"
+              className="h-8 w-8 rounded-full shadow-sm bg-background/80 backdrop-blur border hover:bg-background"
               onClick={() => setIsEditDialogOpen(true)}
             >
               <Pencil className="h-4 w-4 text-branding-dark" />
+            </Button>
+            <Button
+              variant="secondary"
+              size="icon"
+              className="h-8 w-8 rounded-full shadow-sm bg-background/80 backdrop-blur border hover:bg-destructive hover:text-destructive-foreground transition-colors"
+              onClick={() => setIsDeleteDialogOpen(true)}
+            >
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
 
@@ -99,6 +109,11 @@ export function MaterialCard({ material }: MaterialCardProps) {
         material={material}
         isOpen={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
+      />
+      <DeleteMaterialDialog
+        material={material}
+        isOpen={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
       />
     </>
   );

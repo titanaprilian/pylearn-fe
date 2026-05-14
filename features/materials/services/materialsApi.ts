@@ -72,3 +72,17 @@ export async function updateMaterial(
     message: result.message,
   };
 }
+
+export async function deleteMaterial(
+  id: string,
+): Promise<{ success: boolean; message: string }> {
+  const { data } = await ApiAxios.delete<{
+    error: boolean;
+    message: string;
+  }>(`/materials/${id}`);
+
+  return {
+    success: !data.error,
+    message: data.message,
+  };
+}

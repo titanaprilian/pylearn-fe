@@ -33,5 +33,6 @@ export const API_ENDPOINTS = {
     LIST: `${API_URL}/materials`,
     CREATE: `${API_URL}/materials/me`,
     UPDATE: (id: string) => `${API_URL}/materials/${id}`,
+    DELETE: (id: string) => `${API_URL}/materials/${id}`,
   },
 };
