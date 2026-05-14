@@ -29,4 +29,8 @@ export const API_ENDPOINTS = {
   DASHBOARD: {
     LIST: `${API_URL}/dashboard`,
   },
+  MATERIALS: {
+    LIST: `${API_URL}/materials`,
+    CREATE: `${API_URL}/materials/me`,
+  },
 };
