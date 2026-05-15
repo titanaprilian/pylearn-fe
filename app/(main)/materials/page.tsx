@@ -1,17 +1,17 @@
 "use client";
 
 import { useTranslations } from "@/lib/i18n/useTranslation";
+import { Suspense, useRef } from "react"; // Tambahkan Suspense
 import {
   MaterialHeader,
-  MaterialFilters,
   MaterialsList,
   useFetchMaterials,
   useMaterialFilters,
 } from "@/features/materials";
 import { TablePagination } from "@/components/ui/table-pagination";
-import { useRef } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default function MaterialsPage() {
+function MaterialsCollection() {
   const t = useTranslations();
   const filters = useMaterialFilters();
   const listRef = useRef<HTMLDivElement>(null);
@@ -25,16 +25,7 @@ export default function MaterialsPage() {
   });
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      <MaterialHeader />
-
-      {/* <MaterialFilters */}
-      {/*   materialType={filters.materialType} */}
-      {/*   isPublished={filters.isPublished} */}
-      {/*   onTypeChange={filters.setMaterialType} */}
-      {/*   onStatusChange={filters.setIsPublished} */}
-      {/* /> */}
-
+    <>
       <div ref={listRef}>
         <MaterialsList data={data?.data || []} isLoading={isLoading} />
       </div>
@@ -51,6 +42,31 @@ export default function MaterialsPage() {
           scrollRef={listRef}
         />
       )}
+    </>
+  );
+}
+
+// 2. Export utama membungkus konten dengan Suspense
+export default function MaterialsPage() {
+  return (
+    <div className="flex flex-col gap-6 p-6">
+      <MaterialHeader />
+
+      {/* 
+          Suspense HARUS berada di luar komponen yang memanggil useMaterialFilters.
+          Next.js butuh batas ini untuk menangani CSR Bailout.
+      */}
+      <Suspense
+        fallback={
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <Skeleton key={i} className="h-64 w-full rounded-xl" />
+            ))}
+          </div>
+        }
+      >
+        <MaterialsCollection />
+      </Suspense>
     </div>
   );
 }

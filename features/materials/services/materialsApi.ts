@@ -1,16 +1,25 @@
 import { ApiAxios } from "@utils/axios";
-import { CreateMaterialRequest, UpdateMaterialRequest, Material } from "../types";
-import { MaterialFilters, MaterialsResponse, ApiMaterialsResponse } from "../types";
+import { Material } from "../types";
+import {
+  MaterialFilters,
+  MaterialsResponse,
+  ApiMaterialsResponse,
+} from "../types";
+import {
+  CreateMaterialRequest,
+  UpdateMaterialRequest,
+} from "../schemas/materialSchema";
 
 export async function fetchMaterials(
-  filters: Partial<MaterialFilters>
+  filters: Partial<MaterialFilters>,
 ): Promise<MaterialsResponse> {
   const params: Record<string, string | number | boolean> = {};
   if (filters.page) params.page = filters.page;
   if (filters.limit) params.limit = filters.limit;
   if (filters.lecturerId) params.lecturerId = filters.lecturerId;
   if (filters.materialType) params.materialType = filters.materialType;
-  if (filters.isPublished !== undefined) params.isPublished = filters.isPublished;
+  if (filters.isPublished !== undefined)
+    params.isPublished = filters.isPublished;
 
   const { data } = await ApiAxios.get<ApiMaterialsResponse>("/materials", {
     params,
@@ -36,19 +45,17 @@ export async function fetchMaterialById(id: string): Promise<Material> {
 }
 
 export async function createMaterial(
-  data: CreateMaterialRequest,
+  data: CreateMaterialRequest | FormData,
 ): Promise<{ material: Material; message: string }> {
   const { data: result } = await ApiAxios.post<{
     data: Material;
     message: string;
-  }>("/materials/me", {
-    title: data.title,
-    description: data.description,
-    materialType: data.materialType,
-    content: data.content,
-    sourceUrl: data.sourceUrl,
-    iconName: data.iconName,
-    isPublished: data.isPublished,
+  }>("/materials/me", data, {
+    headers: {
+      ...(data instanceof FormData && {
+        "Content-Type": "multipart/form-data",
+      }),
+    },
   });
 
   return {
@@ -94,3 +101,4 @@ export async function deleteMaterial(
     message: data.message,
   };
 }
+

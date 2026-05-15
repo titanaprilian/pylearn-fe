@@ -1,5 +1,4 @@
 import { ApiErrorResponse } from "@/lib/types";
-import { CreateMaterialRequest, UpdateMaterialRequest } from "../schemas/materialSchema";
 
 export type { ApiErrorResponse };
 
@@ -38,6 +37,19 @@ export interface ApiMaterialsResponse extends ApiErrorResponse {
     totalPages: number;
   };
 }
+
+export interface CreateMaterialRequest {
+  title: string;
+  description?: string;
+  materialType: MaterialType;
+  content?: string;
+  sourceUrl?: string;
+  iconName?: string;
+  isPublished: boolean;
+  file?: File; // For PDF uploads
+}
+
+export interface UpdateMaterialRequest extends Partial<CreateMaterialRequest> {}
 
 export interface MaterialsResponse {
   data: Material[];

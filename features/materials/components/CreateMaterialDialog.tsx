@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "@/lib/i18n/useTranslation";
 import {
   Dialog,
   DialogContent,
@@ -14,15 +13,32 @@ import { Button } from "@/components/ui/button";
 import { Plus, BookOpen } from "lucide-react";
 import { MaterialForm } from "./MaterialForm";
 import { useCreateMaterial } from "../hooks/useMaterials";
-import { CreateMaterialRequest } from "../types";
 
 export function CreateMaterialDialog() {
-  const t = useTranslations();
   const [open, setOpen] = useState(false);
   const { mutate: createMaterial, isPending } = useCreateMaterial();
 
-  const onSubmit = (data: CreateMaterialRequest) => {
-    createMaterial(data, {
+  const onSubmit = (values: any) => {
+    // 1. Create a new FormData instance
+    const formData = new FormData();
+
+    // 2. Append standard text fields
+    formData.append("title", values.title);
+    formData.append("description", values.description || "");
+    formData.append("materialType", values.materialType);
+    formData.append("iconName", values.iconName);
+    formData.append("isPublished", String(values.isPublished));
+
+    // 3. Logic to handle Text vs PDF file
+    if (values.materialType === "text") {
+      formData.append("content", values.content || "");
+    } else if (values.materialType === "file" && values.file) {
+      // This specifically triggers the multipart/form-data encoding
+      formData.append("file", values.file);
+    }
+
+    // 4. Pass the FormData object to the mutation
+    createMaterial(formData, {
       onSuccess: () => {
         setOpen(false);
       },
@@ -34,7 +50,7 @@ export function CreateMaterialDialog() {
       <DialogTrigger asChild>
         <Button className="bg-branding-dark gap-2">
           <Plus className="h-4 w-4" />
-          {t("materials.header.create")}
+          Buat Materi Baru
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
@@ -45,15 +61,17 @@ export function CreateMaterialDialog() {
             </div>
             <div>
               <DialogTitle className="text-xl">
-                {t("materials.dialog.create.title")}
+                Tambah Materi Pembelajaran
               </DialogTitle>
               <DialogDescription>
-                {t("materials.dialog.create.description")}
+                Isi formulir di bawah untuk membuat materi teks atau mengunggah
+                file PDF.
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
+        {/* The MaterialForm now receives this updated onSubmit */}
         <MaterialForm onSubmit={onSubmit} isLoading={isPending} />
       </DialogContent>
     </Dialog>

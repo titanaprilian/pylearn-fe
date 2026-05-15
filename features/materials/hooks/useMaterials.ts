@@ -1,6 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchMaterials, fetchMaterialById, createMaterial, updateMaterial, deleteMaterial } from "../services/materialsApi";
-import { MaterialFilters, MaterialsResponse, CreateMaterialRequest, UpdateMaterialRequest, Material } from "../types";
+import {
+  fetchMaterials,
+  fetchMaterialById,
+  createMaterial,
+  updateMaterial,
+  deleteMaterial,
+} from "../services/materialsApi";
+import {
+  MaterialFilters,
+  MaterialsResponse,
+  CreateMaterialRequest,
+  UpdateMaterialRequest,
+  Material,
+} from "../types";
 import { toast } from "sonner";
 
 export const materialKeys = {
@@ -31,13 +43,14 @@ export function useCreateMaterial() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateMaterialRequest) => createMaterial(data),
+    mutationFn: (data: CreateMaterialRequest | FormData) =>
+      createMaterial(data),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: materialKeys.all });
-      toast.success(data.message || "Material created successfully");
+      toast.success("Materi berhasil dibuat");
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Failed to create material");
+      toast.error(error.response?.data?.message || "Gagal membuat materi");
     },
   });
 }

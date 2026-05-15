@@ -16,10 +16,8 @@
     "draft": "Solo borradores"
   },
   "types": {
-    "text": "Texto",
-    "file": "Archivo",
-    "video": "Video",
-    "link": "Enlace"
+    "text": "Text Document",
+    "file": "PDF File"
   },
   "form": {
     "title": {
@@ -82,3 +80,4 @@
   },
   "noResults": "No se encontraron materiales que coincidan con tus filtros."
 }
+

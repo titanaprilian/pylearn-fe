@@ -16,10 +16,8 @@
     "draft": "Draft Only"
   },
   "types": {
-    "text": "Text",
-    "file": "File",
-    "video": "Video",
-    "link": "Link"
+    "text": "Text Document",
+    "file": "PDF File"
   },
   "form": {
     "title": {
@@ -82,3 +80,4 @@
   },
   "noResults": "No materials found matching your filters."
 }
+

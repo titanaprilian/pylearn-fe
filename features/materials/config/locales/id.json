@@ -15,6 +15,10 @@
     "published": "Hanya Terbit",
     "draft": "Hanya Draf"
   },
+  "types": {
+    "text": "Text Document",
+    "file": "PDF File"
+  },
   "form": {
     "title": {
       "label": "Judul",
@@ -76,3 +80,4 @@
   },
   "noResults": "Tidak ada materi yang ditemukan sesuai dengan filter Anda."
 }
+

@@ -5,16 +5,24 @@ export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get("authorization");
     const acceptLanguage = request.headers.get("accept-language");
+    const contentType = request.headers.get("content-type");
+
+    const headers: Record<string, string> = {};
+
+    if (authHeader) headers["Authorization"] = authHeader;
+    if (acceptLanguage) headers["accept-language"] = acceptLanguage;
+
+    if (contentType) {
+      headers["Content-Type"] = contentType;
+    }
+
+    const bodyBuffer = await request.arrayBuffer();
 
     const response = await fetch(API_ENDPOINTS.MATERIALS.CREATE, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(authHeader && { Authorization: authHeader }),
-        ...(acceptLanguage && { "accept-language": acceptLanguage }),
-      },
+      headers: headers,
       credentials: "include",
-      body: await request.text(),
+      body: bodyBuffer,
     });
 
     const data = await response.json();
@@ -25,9 +33,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(data);
   } catch (error) {
+    console.error("Material creation integration error:", error);
     return NextResponse.json(
       { message: "Unable to connect to server" },
       { status: 500 },
     );
   }
 }
+

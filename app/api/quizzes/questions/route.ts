@@ -14,6 +14,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    console.log("Headers being sent to backend:", {
+      Authorization: authHeader,
+      AcceptLanguage: acceptLanguage,
+    });
+
     const response = await fetch(API_ENDPOINTS.QUIZZES.QUESTIONS(quizLevelId), {
       method: "GET",
       headers: {
@@ -23,15 +28,19 @@ export async function GET(request: NextRequest) {
       },
       credentials: "include",
     });
-
+    console.log("QUIZ LEVEL ID", quizLevelId);
     const data = await response.json();
 
+    console.log("BACKEND ERROR DATA:", data);
+
     if (!response.ok) {
+      console.log(response);
       return NextResponse.json(data, { status: response.status });
     }
 
     return NextResponse.json(data);
   } catch (error) {
+    console.error("NEXT_JS_API_CRASH:", error); // <-- Add this to see if Next.js itself is breaking
     return NextResponse.json(
       { message: "Unable to connect to server" },
       { status: 500 },

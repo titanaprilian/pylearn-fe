@@ -136,6 +136,7 @@ export async function deleteQuizLevel(
 export async function getQuizQuestions(
   quizLevelId: string,
 ): Promise<QuizQuestion[]> {
+  console.log("GET QUIZ QUESTION: ", quizLevelId);
   const { data: result } = await ApiAxios.get<ApiResponse<QuizQuestion[]>>(
     `/quizzes/questions?quizLevelId=${quizLevelId}`,
   );
