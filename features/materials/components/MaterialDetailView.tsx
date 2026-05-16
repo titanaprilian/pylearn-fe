@@ -1,33 +1,93 @@
 "use client";
 
-import { useTranslations } from "@/lib/i18n/useTranslation";
-import { useFetchMaterialById } from "../hooks/useMaterials";
-import { HtmlRenderer } from "./HtmlRenderer";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl"; // Sesuaikan jika menggunakan i18n lain
+import { useForm } from "react-hook-form";
+import { useState } from "react";
+
+import { useFetchMaterialById } from "@/features/materials/hooks/useMaterials"; // Sesuaikan path import Anda
+import { useFetchQuizLevelsByMaterialId } from "@/features/quizzes/hooks/useQuizLevels";
+import {
+  useCreateQuizAttempt,
+  useFetchQuizAttempts,
+} from "@/features/quizzes/hooks/useQuizAttempts"; // Impor useFetchQuizAttempts & useCreateQuizAttempt standar
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { materialTypeIcons } from "../config/materials";
-import { icons, ArrowLeft, Calendar, User } from "lucide-react";
-import Link from "next/link";
+import {
+  ArrowLeft,
+  Loader2,
+  GraduationCap,
+  User,
+  Calendar,
+  Play,
+  ArrowRight,
+} from "lucide-react";
+import { useAuth } from "@/features/auth";
+
+// Mocking component jika belum diimport
+const HtmlRenderer = ({ content }: { content: string }) => (
+  <div
+    className="prose max-w-none"
+    dangerouslySetInnerHTML={{ __html: content }}
+  />
+);
 
 interface MaterialDetailViewProps {
   id: string;
 }
 
 export function MaterialDetailView({ id }: MaterialDetailViewProps) {
-  const t = useTranslations();
+  const router = useRouter();
+
+  // 1. Fetch data materi dan tingkatan level kuis
   const { data: material, isLoading } = useFetchMaterialById(id);
+  const { data: quizLevels, isLoading: isLevelsLoading } =
+    useFetchQuizLevelsByMaterialId(id);
 
-  const TypeIcon = material?.materialType
-    ? materialTypeIcons[material.materialType] || materialTypeIcons.text
-    : null;
+  // Ambil quizId dari relasi level kuis yang ada di materi ini
+  const currentQuizId = quizLevels?.[0]?.quizId;
 
-  const DynamicIcon = material?.iconName
-    ? (icons[material.iconName as keyof typeof icons] as React.ElementType)
-    : null;
+  // Jika Anda memiliki state/hook otentikasi (misal: NextAuth atau Zustand), Anda bisa memanggilnya di sini:
+  const { user } = useAuth();
+  const currentStudentId = user?.id;
 
-  if (isLoading) {
+  // 2. Fetch attempts SECARA SPESIFIK untuk kuis ini saja
+  const { data: attempts, isLoading: isAttemptsLoading } = useFetchQuizAttempts(
+    {
+      quizId: currentQuizId,
+      studentId: currentStudentId,
+    },
+  );
+
+  // 3. Gunakan hook useCreateQuizAttempt
+  const { mutateAsync: createAttempt, isPending: isCreatingAttempt } =
+    useCreateQuizAttempt();
+
+  // Handler dinamis untuk tombol kuis
+  const handleQuizAction = async (
+    quizId: string,
+    existingAttemptId?: string,
+  ) => {
+    // A. Jika sudah ada attempt aktif, langsung arahkan siswa ke halaman pengerjaan
+    if (existingAttemptId) {
+      router.push(`/quizzes/attempts/${existingAttemptId}`);
+      return;
+    }
+
+    // B. Jika belum ada, tembak API POST untuk membuat attempt baru
+    try {
+      const result = await createAttempt({ quizId });
+      router.push(`/quizzes/attempts/${result.attempt.id}`);
+    } catch (error) {
+      console.error("Failed to handle quiz action:", error);
+    }
+  };
+
+  if (isLoading || isLevelsLoading || isAttemptsLoading) {
     return (
       <div className="flex flex-col gap-6 p-6 max-w-4xl mx-auto">
         <Skeleton className="h-8 w-32" />
@@ -44,11 +104,11 @@ export function MaterialDetailView({ id }: MaterialDetailViewProps) {
   if (!material) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 p-6">
-        <p className="text-muted-foreground">{t("materials.detail.notFound")}</p>
+        <p className="text-muted-foreground">Materi tidak ditemukan</p>
         <Button variant="outline" asChild>
           <Link href="/materials">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            {t("materials.detail.backToList")}
+            Kembali ke Daftar
           </Link>
         </Button>
       </div>
@@ -60,38 +120,34 @@ export function MaterialDetailView({ id }: MaterialDetailViewProps) {
       <Button variant="ghost" size="sm" className="w-fit pl-0" asChild>
         <Link href="/materials">
           <ArrowLeft className="h-4 w-4 mr-2" />
-          {t("materials.detail.backToList")}
+          Kembali ke Daftar
         </Link>
       </Button>
 
+      {/* HEADER PANEL MATERI */}
       <div className="flex flex-col gap-4">
         <div className="flex items-start gap-4">
-          <div className="w-14 h-14 rounded-xl bg-branding-dark flex items-center justify-center shadow-lg shadow-branding-dark/20 flex-shrink-0">
-            {DynamicIcon ? (
-              <DynamicIcon className="h-7 w-7 text-white" />
-            ) : (
-              <span className="text-xl font-bold text-white uppercase" suppressHydrationWarning>
-                {material.title.charAt(0)}
-              </span>
-            )}
+          <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center shadow-lg flex-shrink-0">
+            <span className="text-xl font-bold text-white uppercase">
+              {material.title.charAt(0)}
+            </span>
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-2xl font-bold leading-tight">
               {material.title}
             </h1>
             <div className="flex flex-wrap items-center gap-2 mt-2">
-              {TypeIcon && (
-                <div className="p-1 rounded-md bg-muted">
-                  <TypeIcon className="h-4 w-4 text-branding-dark" />
-                </div>
-              )}
-              <Badge variant="secondary" className="text-xs uppercase tracking-wider">
-                {t(`materials.types.${material.materialType}`)}
+              <Badge
+                variant="secondary"
+                className="text-xs uppercase tracking-wider"
+              >
+                {material.materialType}
               </Badge>
-              <Badge variant={material.isPublished ? "default" : "outline"} className="text-xs">
-                {material.isPublished
-                  ? t("materials.status.published")
-                  : t("materials.status.draft")}
+              <Badge
+                variant={material.isPublished ? "default" : "outline"}
+                className="text-xs"
+              >
+                {material.isPublished ? "Published" : "Draft"}
               </Badge>
             </div>
           </div>
@@ -103,31 +159,91 @@ export function MaterialDetailView({ id }: MaterialDetailViewProps) {
 
         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground border-t border-b py-3">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center border">
-              <User className="h-3 w-3" />
-            </div>
+            <User className="h-4 w-4" />
             <span>{material.lecturerName || "Instructor"}</span>
           </div>
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
-            <span suppressHydrationWarning>
-              {new Date(material.createdAt).toLocaleDateString()}
-            </span>
+            <span>{new Date(material.createdAt).toLocaleDateString()}</span>
           </div>
         </div>
       </div>
 
+      {/* ISI KONTEN MATERI MODUL */}
       <Card>
         <CardContent className="p-6">
           {material.content ? (
             <HtmlRenderer content={material.content} />
           ) : (
-            <p className="text-muted-foreground italic">
-              {t("materials.detail.noContent")}
-            </p>
+            <p className="text-muted-foreground italic">Konten kosong</p>
           )}
         </CardContent>
       </Card>
+
+      {/* SEGMEN TINGKATAN KUIS ADAPTIF */}
+      {quizLevels && quizLevels.length > 0 && (
+        <Card className="border-t-4 border-t-primary">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <GraduationCap className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold">Tingkat Kuis Tersedia</h2>
+            </div>
+
+            <div className="space-y-3">
+              {quizLevels.map((level) => {
+                // CARI DATA ATTEMPT AKTIF:
+                // Cari dari array data attempt yang quizId-nya sama DAN belum disubmit (submittedAt === null)
+                const activeAttempt = attempts?.find(
+                  (att) =>
+                    att.quizId === level.quizId && att.submittedAt === null,
+                );
+
+                const hasActiveAttempt = !!activeAttempt;
+
+                return (
+                  <div
+                    key={level.id}
+                    className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-bold text-sm text-foreground">
+                        {level.title}
+                      </span>
+                      <span className="text-xs text-muted-foreground mt-0.5">
+                        Status Kuis:{" "}
+                        {hasActiveAttempt
+                          ? "🔴 Sedang Dikerjakan"
+                          : "🟢 Siap Dimulai"}
+                      </span>
+                    </div>
+
+                    <Button
+                      onClick={() =>
+                        handleQuizAction(level.quizId, activeAttempt?.id)
+                      }
+                      disabled={isCreatingAttempt}
+                      size="sm"
+                      // Berikan warna variasi biru/indigo (secondary/outline) jika berstatus "Lanjutkan" agar kontras visualnya jelas
+                      variant={hasActiveAttempt ? "secondary" : "default"}
+                      className="font-medium shadow-sm"
+                    >
+                      {isCreatingAttempt ? (
+                        <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                      ) : hasActiveAttempt ? (
+                        <ArrowRight className="mr-1.5 h-4 w-4 text-primary animate-pulse" />
+                      ) : (
+                        <Play className="mr-1.5 h-3.5 w-3.5 fill-current" />
+                      )}
+                      {hasActiveAttempt ? "Lanjutkan Kuis" : "Mulai Kuis"}
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
+

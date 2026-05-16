@@ -9,6 +9,7 @@ export interface QuizLevel {
   levelOrder: number;
   createdAt: string;
   updatedAt: string;
+  quizTitle?: string;
 }
 
 export interface Quiz {
@@ -39,5 +40,41 @@ export interface QuizQuestion {
   updatedAt: string;
 }
 
+export interface QuizQuestionAttempt {
+  id: string;
+  quizLevelId: string;
+  questionText: string;
+  maxScore: number;
+  questionOrder: number;
+}
+
+export interface QuizAttempt {
+  id: string;
+  quizId: string;
+  quizLevelId?: string;
+  quizTitle: string;
+  studentId: string;
+  studentName: string;
+  startedAt: string;
+  submittedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface QuizAnswer {
+  id: string;
+  quizAttemptId: string;
+  quizQuestionId: string;
+  questionText: string;
+  answerText: string;
+  isCorrect: boolean | null;
+  answeredAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type ApiQuizzesResponse = ApiResponse<Quiz[]>;
 export type ApiQuestionsResponse = ApiResponse<QuizQuestion[]>;
+export type ApiAttemptResponse = ApiResponse<QuizAttempt[]>;
+export type ApiAnswerResponse = ApiResponse<QuizAnswer[]>;
+export type ApiQuestionAttemptsResponse = ApiResponse<QuizQuestionAttempt[]>;

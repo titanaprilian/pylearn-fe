@@ -23,6 +23,25 @@ export const quizQuestionSchema = z.object({
   questionOrder: z.number().int().min(1),
 });
 
+export const quizAttemptSchema = z.object({
+  quizId: z.string().min(1, "Quiz ID wajib diisi untuk memulai percobaan"),
+});
+
+export const quizAnswerSchema = z.object({
+  quizAttemptId: z.string().min(1, "Quiz Attempt ID wajib disertakan"),
+  quizQuestionId: z.string().min(1, "Quiz Question ID wajib disertakan"),
+  answerText: z.string().min(1, "Jawaban esai tidak boleh kosong"),
+});
+
+export const quizQuestionAttemptSchema = z.object({
+  quizLevelId: z.string().min(1, "Quiz Level ID relation is required"),
+  questionText: z.string().min(1, "Pertanyaan wajib diisi"),
+  maxScore: z.number().int().min(1),
+  questionOrder: z.number().int().min(1),
+});
+
 export type QuizLevelFormData = z.infer<typeof quizLevelSchema>;
 export type QuizFormData = z.infer<typeof quizSchema>;
 export type QuizQuestionFormData = z.infer<typeof quizQuestionSchema>;
+export type QuizAttemptFormData = z.infer<typeof quizAttemptSchema>;
+export type QuizAnswerFormData = z.infer<typeof quizAnswerSchema>;

@@ -1,6 +1,39 @@
 import { ApiAxios } from "@utils/axios";
-import { Quiz, ApiQuizzesResponse, QuizLevel, QuizQuestion } from "../types";
+import {
+  Quiz,
+  ApiQuizzesResponse,
+  QuizLevel,
+  QuizQuestion,
+  QuizAttempt,
+  QuizAnswer,
+  QuizQuestionAttempt,
+  ApiQuestionAttemptsResponse,
+} from "../types";
 import { ApiResponse } from "@/lib/types";
+
+// # ========================================================
+// # = Quiz Levels by Material
+// # ========================================================
+
+export async function getQuizLevelsByMaterialId(
+  materialId: string,
+): Promise<QuizLevel[]> {
+  const quizzes = await getQuizzes(materialId);
+  const levels: QuizLevel[] = [];
+
+  for (const quiz of quizzes) {
+    if (quiz.levels && quiz.levels.length > 0) {
+      for (const level of quiz.levels) {
+        levels.push({
+          ...level,
+          quizTitle: quiz.title,
+        });
+      }
+    }
+  }
+
+  return levels;
+}
 
 // # ========================================================
 // # = Quiz API
@@ -144,6 +177,19 @@ export async function getQuizQuestions(
   return result.data;
 }
 
+export async function getQuizQuestionsForAttempt(
+  quizLevelId: string,
+): Promise<QuizQuestionAttempt[]> {
+  const { data: result } = await ApiAxios.get<ApiQuestionAttemptsResponse>(
+    "/quizzes/questions/attempt",
+    {
+      params: { quizLevelId },
+    },
+  );
+
+  return result.data;
+}
+
 export async function createQuizQuestion(data: {
   quizLevelId: string;
   questionText: string;
@@ -190,6 +236,99 @@ export async function deleteQuizQuestion(
   );
 
   return {
+    message: result.message,
+  };
+}
+
+// # ========================================================
+// # = Quiz Attempt API
+// # ========================================================
+
+export async function getQuizAttempts(filters?: {
+  quizId?: string;
+  studentId?: string;
+}): Promise<QuizAttempt[]> {
+  const { data: result } = await ApiAxios.get<ApiResponse<QuizAttempt[]>>(
+    "/quizzes/attempts",
+    { params: filters },
+  );
+
+  return result.data;
+}
+
+export async function getQuizAttemptById(id: string): Promise<QuizAttempt> {
+  const { data: result } = await ApiAxios.get<ApiResponse<QuizAttempt>>(
+    `/quizzes/attempts/${id}`,
+  );
+
+  return result.data;
+}
+
+export async function createQuizAttempt(data: {
+  quizId: string;
+  quizLevelId?: string;
+}): Promise<{ attempt: QuizAttempt; message: string }> {
+  const { data: result } = await ApiAxios.post<ApiResponse<QuizAttempt>>(
+    "/quizzes/attempts",
+    data,
+  );
+
+  return {
+    attempt: result.data,
+    message: result.message,
+  };
+}
+
+export async function createQuizAttemptByMaterial(
+  data: {
+    materialId: string;
+    levelId: string;
+  },
+  token?: string,
+): Promise<{ attempt: QuizAttempt; message: string }> {
+  const levels = await getQuizLevelsByMaterialId(data.materialId);
+  const targetLevel = levels.find((l) => l.id === data.levelId);
+
+  if (!targetLevel) {
+    throw new Error("Level not found for this material");
+  }
+
+  const result = await createQuizAttempt({
+    quizId: targetLevel.quizId,
+    quizLevelId: targetLevel.id,
+  });
+
+  return result;
+}
+
+export async function submitQuizAttempt(
+  id: string,
+): Promise<{ attempt: QuizAttempt; message: string }> {
+  const { data: result } = await ApiAxios.patch<ApiResponse<QuizAttempt>>(
+    `/quizzes/attempts/${id}/submit`,
+  );
+
+  return {
+    attempt: result.data,
+    message: result.message,
+  };
+}
+
+// # ========================================================
+// # = Quiz Answer API
+// # ========================================================
+export async function submitStudentAnswer(data: {
+  quizAttemptId: string;
+  quizQuestionId: string;
+  answerText: string;
+}): Promise<{ answer: QuizAnswer; message: string }> {
+  const { data: result } = await ApiAxios.post<ApiResponse<QuizAnswer>>(
+    "/quizzes/answers",
+    data,
+  );
+
+  return {
+    answer: result.data,
     message: result.message,
   };
 }

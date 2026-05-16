@@ -44,7 +44,7 @@ export const API_ENDPOINTS = {
     UPDATE: (id: string) => `${API_URL}/quizzes/${id}`,
     DELETE: (id: string) => `${API_URL}/quizzes/${id}`,
 
-    LEVELS: (quizId: string) => `${API_URL}/quizzes/levels?quizId=${quizId}`,
+    LEVELS: (quizId: string) => `${API_URL}/quizzes/levels/?quizId=${quizId}`,
     CREATE_LEVEL: () => `${API_URL}/quizzes/levels`,
     GET_LEVEL: (id: string) => `${API_URL}/quizzes/levels/${id}`,
     UPDATE_LEVEL: (id: string) => `${API_URL}/quizzes/levels/${id}`,
@@ -52,8 +52,15 @@ export const API_ENDPOINTS = {
 
     QUESTIONS: (quizLevelId: string) =>
       `${API_URL}/quizzes/questions/?quizLevelId=${quizLevelId}`,
+    GET_QUESTIONS_FOR_ATTEMPT: (quizLevelId: string) =>
+      `${API_URL}/quizzes/questions/attempt?quizLevelId=${quizLevelId}`,
     CREATE_QUESTION: () => `${API_URL}/quizzes/questions`,
     UPDATE_QUESTION: (id: string) => `${API_URL}/quizzes/questions/${id}`,
     DELETE_QUESTION: (id: string) => `${API_URL}/quizzes/questions/${id}`,
+
+    ATTEMPTS: () => `${API_URL}/quizzes/attempts/`,
+    CREATE_ATTEMPT: () => `${API_URL}/quizzes/attempts`,
+    GET_ATTEMPT: (id: string) => `${API_URL}/quizzes/attempts/${id}`,
+    SUBMIT_ATTEMPT: (id: string) => `${API_URL}/quizzes/attempts/${id}/submit`,
   },
 };

@@ -7,6 +7,7 @@ import {
   createQuizQuestion,
   updateQuizQuestion,
   deleteQuizQuestion,
+  getQuizQuestionsForAttempt,
 } from "../services/quizApi";
 import { quizKeys } from "./useQuizzes";
 
@@ -16,12 +17,23 @@ export const questionKeys = {
   lists: () => [...questionKeys.all, "list"] as const,
   list: (quizLevelId: string) =>
     [...questionKeys.lists(), { quizLevelId }] as const,
+  attempts: () => [...questionKeys.all, "attempt"] as const,
+  attemptList: (quizLevelId: string) =>
+    [...questionKeys.attempts(), { quizLevelId }] as const,
 };
 
 export function useFetchQuizQuestions(quizLevelId: string) {
   return useQuery({
     queryKey: questionKeys.list(quizLevelId),
     queryFn: () => getQuizQuestions(quizLevelId),
+    enabled: !!quizLevelId,
+  });
+}
+
+export function useFetchQuizQuestionsForAttempt(quizLevelId: string) {
+  return useQuery({
+    queryKey: questionKeys.attemptList(quizLevelId),
+    queryFn: () => getQuizQuestionsForAttempt(quizLevelId),
     enabled: !!quizLevelId,
   });
 }

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import {
   getQuizLevels,
   getQuizLevelById,
+  getQuizLevelsByMaterialId,
   createQuizLevel,
   updateQuizLevel,
   deleteQuizLevel,
@@ -15,6 +16,9 @@ export const levelKeys = {
   all: ["quiz-levels"] as const,
   lists: () => [...levelKeys.all, "list"] as const,
   list: (quizId: string) => [...levelKeys.lists(), { quizId }] as const,
+  listsByMaterial: () => [...levelKeys.all, "list-by-material"] as const,
+  listByMaterial: (materialId: string) =>
+    [...levelKeys.listsByMaterial(), { materialId }] as const,
   details: () => [...levelKeys.all, "detail"] as const,
   detail: (id: string) => [...levelKeys.details(), id] as const,
 };
@@ -32,6 +36,14 @@ export function useFetchQuizLevelDetail(id: string) {
     queryKey: levelKeys.detail(id),
     queryFn: () => getQuizLevelById(id),
     enabled: !!id,
+  });
+}
+
+export function useFetchQuizLevelsByMaterialId(materialId: string) {
+  return useQuery({
+    queryKey: levelKeys.listByMaterial(materialId),
+    queryFn: () => getQuizLevelsByMaterialId(materialId),
+    enabled: !!materialId,
   });
 }
 
