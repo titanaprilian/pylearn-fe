@@ -10,8 +10,10 @@ import {
   submitQuizAttempt,
   submitStudentAnswer,
   submitBulkStudentAnswers,
+  getMyQuizStatus,
 } from "../services/quizApi";
 import { QuizAttempt } from "../types";
+import { QuizAttemptFormData } from "../schemas/quizSchema";
 
 export const attemptKeys = {
   all: ["quiz-attempts"] as const,
@@ -41,21 +43,21 @@ export function useFetchQuizAttemptDetail(id: string) {
   });
 }
 
-export function useCreateQuizAttempt(filters?: {
-  quizId?: string;
-  studentId?: string;
-}) {
+export function useCreateQuizAttempt() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: createQuizAttempt,
+    mutationFn: (data: QuizAttemptFormData) => createQuizAttempt(data),
     onSuccess: (response) => {
       queryClient.invalidateQueries({
         queryKey: attemptKeys.lists(),
       });
-      toast.success(
-        response.message || "Sesi kuis berhasil dimulai. Selamat mengerjakan!",
-      );
+
+      queryClient.invalidateQueries({
+        queryKey: [...attemptKeys.all, "status-me"],
+      });
+
+      toast.success("Sesi kuis berhasil dimulai. Selamat mengerjakan!");
     },
     onError: (error: any) => {
       toast.error(
@@ -167,5 +169,13 @@ export function useSubmitBulkStudentAnswers(attemptId: string) {
           "Gagal menyimpan kumpulan jawaban Anda.",
       );
     },
+  });
+}
+
+export function useFetchMyQuizStatus(quizId: string) {
+  return useQuery({
+    queryKey: [...attemptKeys.all, "status-me", quizId] as const,
+    queryFn: () => getMyQuizStatus(quizId),
+    enabled: !!quizId,
   });
 }

@@ -7,8 +7,8 @@ import { useFetchMaterialById } from "@/features/materials/hooks/useMaterials"; 
 import { useFetchQuizLevelsByMaterialId } from "@/features/quizzes/hooks/useQuizLevels";
 import {
   useCreateQuizAttempt,
-  useFetchQuizAttempts,
-} from "@/features/quizzes/hooks/useQuizAttempts"; // Impor useFetchQuizAttempts & useCreateQuizAttempt standar
+  useFetchMyQuizStatus,
+} from "@/features/quizzes/hooks/useQuizAttempts"; // Impor useFetchMyQuizStatus & useCreateQuizAttempt standar
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,8 +23,8 @@ import {
   Play,
   ArrowRight,
   ExternalLink,
+  CheckCircle,
 } from "lucide-react";
-import { useAuth } from "@/features/auth";
 import dynamic from "next/dynamic";
 import { API_URL } from "@/app/api/api";
 
@@ -60,17 +60,9 @@ export function MaterialDetailView({ id }: MaterialDetailViewProps) {
   // Ambil quizId dari relasi level kuis yang ada di materi ini
   const currentQuizId = quizLevels?.[0]?.quizId;
 
-  // Jika Anda memiliki state/hook otentikasi (misal: NextAuth atau Zustand), Anda bisa memanggilnya di sini:
-  const { user } = useAuth();
-  const currentStudentId = user?.id;
-
-  // 2. Fetch attempts SECARA SPESIFIK untuk kuis ini saja
-  const { data: attempts, isLoading: isAttemptsLoading } = useFetchQuizAttempts(
-    {
-      quizId: currentQuizId,
-      studentId: currentStudentId,
-    },
-  );
+  // 2. Fetch status kuis secara reliabel (level-by-level)
+  const { data: quizStatus, isLoading: isStatusLoading } =
+    useFetchMyQuizStatus(currentQuizId || "");
 
   // 3. Gunakan hook useCreateQuizAttempt
   const { mutateAsync: createAttempt, isPending: isCreatingAttempt } =
@@ -90,24 +82,25 @@ export function MaterialDetailView({ id }: MaterialDetailViewProps) {
   // Handler dinamis untuk tombol kuis
   const handleQuizAction = async (
     quizId: string,
-    existingAttemptId?: string,
+    levelId: string,
+    existingAttemptId?: string | null,
   ) => {
-    // A. Jika sudah ada attempt aktif, langsung arahkan siswa ke halaman pengerjaan
+    // A. Jika sudah ada attempt aktif (IN_PROGRESS atau COMPLETED), langsung arahkan ke halaman pengerjaan/hasil
     if (existingAttemptId) {
       router.push(`/quizzes/attempts/${existingAttemptId}`);
       return;
     }
 
-    // B. Jika belum ada, tembak API POST untuk membuat attempt baru
+    // B. Jika belum ada (NOT_STARTED), buat attempt baru untuk level tersebut
     try {
-      const result = await createAttempt({ quizId });
+      const result = await createAttempt({ quizId, quizLevelId: levelId });
       router.push(`/quizzes/attempts/${result.attempt.id}`);
     } catch (error) {
       console.error("Failed to handle quiz action:", error);
     }
   };
 
-  if (isLoading || isLevelsLoading || isAttemptsLoading) {
+  if (isLoading || isLevelsLoading || isStatusLoading) {
     return (
       <div className="flex flex-col gap-6 p-6 max-w-4xl mx-auto">
         <Skeleton className="h-8 w-32" />
@@ -218,7 +211,7 @@ export function MaterialDetailView({ id }: MaterialDetailViewProps) {
       </Card>
 
       {/* SEGMEN TINGKATAN KUIS ADAPTIF */}
-      {quizLevels && quizLevels.length > 0 && (
+      {quizStatus?.levels && quizStatus.levels.length > 0 && (
         <Card className="border-t-4 border-t-primary">
           <CardContent className="p-6">
             <div className="flex items-center gap-2 mb-4">
@@ -227,19 +220,13 @@ export function MaterialDetailView({ id }: MaterialDetailViewProps) {
             </div>
 
             <div className="space-y-3">
-              {quizLevels.map((level) => {
-                // CARI DATA ATTEMPT AKTIF:
-                // Cari dari array data attempt yang quizId-nya sama DAN belum disubmit (submittedAt === null)
-                const activeAttempt = attempts?.find(
-                  (att) =>
-                    att.quizId === level.quizId && att.submittedAt === null,
-                );
-
-                const hasActiveAttempt = !!activeAttempt;
+              {quizStatus.levels.map((level) => {
+                const isCompleted = level.status === "COMPLETED";
+                const isInProgress = level.status === "IN_PROGRESS";
 
                 return (
                   <div
-                    key={level.id}
+                    key={level.levelId}
                     className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex flex-col">
@@ -248,30 +235,41 @@ export function MaterialDetailView({ id }: MaterialDetailViewProps) {
                       </span>
                       <span className="text-xs text-muted-foreground mt-0.5">
                         Status Kuis:{" "}
-                        {hasActiveAttempt
-                          ? "🔴 Sedang Dikerjakan"
-                          : "🟢 Siap Dimulai"}
+                        {isCompleted
+                          ? "✅ Selesai"
+                          : isInProgress
+                            ? "🟡 Sedang Dikerjakan"
+                            : "🟢 Siap Dimulai"}
                       </span>
                     </div>
 
                     <Button
                       onClick={() =>
-                        handleQuizAction(level.quizId, activeAttempt?.id)
+                        handleQuizAction(
+                          quizStatus.quizId,
+                          level.levelId,
+                          level.currentAttemptId,
+                        )
                       }
                       disabled={isCreatingAttempt}
                       size="sm"
-                      // Berikan warna variasi biru/indigo (secondary/outline) jika berstatus "Lanjutkan" agar kontras visualnya jelas
-                      variant={hasActiveAttempt ? "secondary" : "default"}
+                      variant={isInProgress ? "secondary" : "default"}
                       className="font-medium shadow-sm"
                     >
                       {isCreatingAttempt ? (
                         <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                      ) : hasActiveAttempt ? (
+                      ) : isInProgress ? (
                         <ArrowRight className="mr-1.5 h-4 w-4 text-primary animate-pulse" />
+                      ) : isCompleted ? (
+                        <CheckCircle className="mr-1.5 h-3.5 w-3.5" />
                       ) : (
                         <Play className="mr-1.5 h-3.5 w-3.5 fill-current" />
                       )}
-                      {hasActiveAttempt ? "Lanjutkan Kuis" : "Mulai Kuis"}
+                      {isInProgress
+                        ? "Lanjutkan"
+                        : isCompleted
+                          ? "Lihat Hasil"
+                          : "Mulai Kuis"}
                     </Button>
                   </div>
                 );

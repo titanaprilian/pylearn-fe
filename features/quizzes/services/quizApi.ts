@@ -9,6 +9,8 @@ import {
   QuizQuestionAttempt,
   ApiQuestionAttemptsResponse,
   ApiBulkAnswersResponse,
+  ApiMyQuizStatusResponse,
+  MyQuizStatusData,
 } from "../types";
 import { ApiResponse } from "@/lib/types";
 import { QuizBulkAnswersFormData } from "../schemas/quizSchema";
@@ -267,8 +269,7 @@ export async function getQuizAttemptById(id: string): Promise<QuizAttempt> {
 }
 
 export async function createQuizAttempt(data: {
-  quizId: string;
-  quizLevelId?: string;
+  quizLevelId: string;
 }): Promise<{ attempt: QuizAttempt; message: string }> {
   const { data: result } = await ApiAxios.post<ApiResponse<QuizAttempt>>(
     "/quizzes/attempts",
@@ -347,4 +348,17 @@ export async function submitBulkStudentAnswers(
     answers: result.data,
     message: result.message,
   };
+}
+
+export async function getMyQuizStatus(
+  quizId: string,
+): Promise<MyQuizStatusData> {
+  const { data: result } = await ApiAxios.get<ApiMyQuizStatusResponse>(
+    "/quizzes/attempts/status/me",
+    {
+      params: { quizId },
+    },
+  );
+
+  return result.data;
 }

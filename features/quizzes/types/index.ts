@@ -50,8 +50,7 @@ export interface QuizQuestionAttempt {
 
 export interface QuizAttempt {
   id: string;
-  quizId: string;
-  quizLevelId?: string;
+  quizLevelId: string;
   quizTitle: string;
   studentId: string;
   studentName: string;
@@ -73,9 +72,33 @@ export interface QuizAnswer {
   updatedAt: string;
 }
 
+export type QuizLevelStatus = "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
+
+export interface MyQuizLevelStatus {
+  levelId: string;
+  title: string;
+  levelOrder: number;
+  status: QuizLevelStatus;
+  currentAttemptId: string | null;
+  totalQuestions: number;
+}
+
+export interface MyQuizAttemptHistory {
+  id: string;
+  submittedAt: string | null;
+  createdAt: string;
+}
+
+export interface MyQuizStatusData {
+  quizId: string;
+  levels: MyQuizLevelStatus[];
+  attemptHistory: MyQuizAttemptHistory[];
+}
+
 export type ApiQuizzesResponse = ApiResponse<Quiz[]>;
 export type ApiQuestionsResponse = ApiResponse<QuizQuestion[]>;
 export type ApiAttemptResponse = ApiResponse<QuizAttempt[]>;
 export type ApiAnswerResponse = ApiResponse<QuizAnswer[]>;
 export type ApiQuestionAttemptsResponse = ApiResponse<QuizQuestionAttempt[]>;
 export type ApiBulkAnswersResponse = ApiResponse<QuizAnswer[]>;
+export type ApiMyQuizStatusResponse = ApiResponse<MyQuizStatusData>;
