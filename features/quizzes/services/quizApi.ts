@@ -297,7 +297,6 @@ export async function createQuizAttemptByMaterial(
   }
 
   const result = await createQuizAttempt({
-    quizId: targetLevel.quizId,
     quizLevelId: targetLevel.id,
   });
 

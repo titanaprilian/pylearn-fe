@@ -42,10 +42,10 @@ export async function POST(request: NextRequest) {
     const acceptLanguage = request.headers.get("accept-language");
     const body = await request.json();
 
-    const { quizId } = body;
-    if (!quizId) {
+    const { quizLevelId } = body;
+    if (!quizLevelId) {
       return NextResponse.json(
-        { message: "quizId is required" },
+        { message: "quizLevelId is required" },
         { status: 400 },
       );
     }

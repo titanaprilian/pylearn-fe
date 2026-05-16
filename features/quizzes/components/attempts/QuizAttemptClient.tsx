@@ -6,7 +6,7 @@ import {
   useSubmitQuizAttempt,
   useSubmitBulkStudentAnswers,
 } from "../../hooks/useQuizAttempts";
-import { useFetchQuizLevels } from "../../hooks/useQuizLevels";
+import { useFetchQuizLevelDetail } from "../../hooks/useQuizLevels";
 import { useFetchQuizQuestionsForAttempt } from "../../hooks/useQuizQuestions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -24,9 +24,11 @@ export function QuizAttemptClient({ attemptId }: QuizAttemptClientProps) {
   const { data: attempt, isLoading: isAttemptLoading } =
     useFetchQuizAttemptDetail(attemptId);
 
-  const quizId = attempt?.quizId;
-  const { data: quizLevels } = useFetchQuizLevels(quizId || "");
-  const quizLevelId = attempt?.quizLevelId || quizLevels?.[0]?.id;
+  const quizLevelId = attempt?.quizLevelId;
+  const { data: levelDetail, isLoading: isLevelLoading } =
+    useFetchQuizLevelDetail(quizLevelId || "");
+
+  const quizId = levelDetail?.quizId;
 
   const { data: questions, isLoading: isQuestionsLoading } =
     useFetchQuizQuestionsForAttempt(quizLevelId || "");
@@ -80,7 +82,7 @@ export function QuizAttemptClient({ attemptId }: QuizAttemptClientProps) {
     }
   };
 
-  if (isAttemptLoading || isQuestionsLoading) {
+  if (isAttemptLoading || isQuestionsLoading || isLevelLoading) {
     return (
       <div className="space-y-6 max-w-4xl mx-auto p-6">
         <Skeleton className="h-8 w-48" />

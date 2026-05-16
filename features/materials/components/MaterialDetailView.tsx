@@ -61,8 +61,9 @@ export function MaterialDetailView({ id }: MaterialDetailViewProps) {
   const currentQuizId = quizLevels?.[0]?.quizId;
 
   // 2. Fetch status kuis secara reliabel (level-by-level)
-  const { data: quizStatus, isLoading: isStatusLoading } =
-    useFetchMyQuizStatus(currentQuizId || "");
+  const { data: quizStatus, isLoading: isStatusLoading } = useFetchMyQuizStatus(
+    currentQuizId || "",
+  );
 
   // 3. Gunakan hook useCreateQuizAttempt
   const { mutateAsync: createAttempt, isPending: isCreatingAttempt } =
@@ -93,7 +94,7 @@ export function MaterialDetailView({ id }: MaterialDetailViewProps) {
 
     // B. Jika belum ada (NOT_STARTED), buat attempt baru untuk level tersebut
     try {
-      const result = await createAttempt({ quizId, quizLevelId: levelId });
+      const result = await createAttempt({ quizLevelId: levelId });
       router.push(`/quizzes/attempts/${result.attempt.id}`);
     } catch (error) {
       console.error("Failed to handle quiz action:", error);
@@ -140,11 +141,7 @@ export function MaterialDetailView({ id }: MaterialDetailViewProps) {
 
         {absolutePdfUrl && (
           <Button variant="outline" size="sm" asChild>
-            <a
-              href={absolutePdfUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href={absolutePdfUrl} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="h-4 w-4 mr-2" />
               Open in Browser
             </a>
@@ -281,4 +278,3 @@ export function MaterialDetailView({ id }: MaterialDetailViewProps) {
     </div>
   );
 }
-

@@ -1,4 +1,7 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const isServer = typeof window === "undefined";
+export const API_URL = isServer
+  ? "http://backend:4000"
+  : process.env.NEXT_PUBLIC_API_URL;
 
 export const API_ENDPOINTS = {
   AUTH: {

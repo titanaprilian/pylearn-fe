@@ -74,8 +74,8 @@ export default function QuizLevelSection({
 
   const totalQuestions = questions?.length ?? 0;
 
-  const form = useForm<QuizQuestionFormData>({
-    resolver: zodResolver(quizQuestionSchema),
+  const form = useForm<any>({
+    resolver: zodResolver(quizQuestionSchema) as any,
     defaultValues: {
       quizLevelId: levelId,
       questionText: "",
@@ -194,7 +194,7 @@ export default function QuizLevelSection({
 
                 {form.formState.errors.questionText && (
                   <p className="text-xs text-destructive">
-                    {form.formState.errors.questionText.message}
+                    {form.formState.errors.questionText.message as string}
                   </p>
                 )}
               </div>
@@ -223,7 +223,7 @@ export default function QuizLevelSection({
 
                 {form.formState.errors.answerText && (
                   <p className="text-xs text-destructive">
-                    {form.formState.errors.answerText.message}
+                    {form.formState.errors.answerText.message as string}
                   </p>
                 )}
               </div>

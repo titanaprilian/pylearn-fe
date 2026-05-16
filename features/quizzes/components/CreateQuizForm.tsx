@@ -31,7 +31,7 @@ export default function CreateQuizForm({
     useCreateQuiz(materialId);
 
   const form = useForm<QuizFormData>({
-    resolver: zodResolver(quizSchema),
+    resolver: zodResolver(quizSchema) as any,
     defaultValues: {
       materialId: materialId,
       title: "",
