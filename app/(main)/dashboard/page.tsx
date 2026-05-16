@@ -2,26 +2,45 @@
 
 import {
   DashboardHeader,
-  DashboardStats,
-  QuickActions,
-  UserDistribution,
+  AdminDashboardView,
+  LecturerDashboardView,
+  StudentDashboardView,
 } from "@features/dashboard";
-import { useFetchDashboard } from "@features/dashboard/hooks/useDashboard";
+import {
+  useFetchDashboard,
+  useFetchLecturerDashboard,
+  useFetchStudentDashboard,
+} from "@features/dashboard/hooks/useDashboard";
+import { useAuth } from "@features/auth/context/AuthProvider";
 
 export default function DashboardPage() {
-  const { data } = useFetchDashboard();
+  const { user } = useAuth();
+  const roleName = user?.roleName?.toLowerCase();
+
+  // Call all hooks but they are enabled/disabled inside the hooks themselves based on auth
+  // However, for efficiency, we can conditionally enable them here if we had control over parameters.
+  // In useDashboard.ts, they are enabled if user exists.
+  
+  const adminQuery = useFetchDashboard();
+  const lecturerQuery = useFetchLecturerDashboard();
+  const studentQuery = useFetchStudentDashboard();
+
+  const renderDashboard = () => {
+    switch (roleName) {
+      case "dosen":
+        return <LecturerDashboardView data={lecturerQuery.data} />;
+      case "mahasiswa":
+        return <StudentDashboardView data={studentQuery.data} />;
+      default:
+        return <AdminDashboardView data={adminQuery.data} />;
+    }
+  };
 
   return (
     <div className="p-8">
       <DashboardHeader />
-      <DashboardStats data={data} />
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-4">
-        <div className="lg:col-span-3">
-          <QuickActions />
-        </div>
-        <div className="lg:col-span-1">
-          <UserDistribution data={data?.userDistribution} />
-        </div>
+      <div className="mt-6">
+        {renderDashboard()}
       </div>
     </div>
   );

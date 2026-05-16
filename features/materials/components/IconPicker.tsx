@@ -104,7 +104,7 @@ export function IconPicker({ value, onChange, disabled }: IconPickerProps) {
             })}
             {filteredIcons.length === 0 && (
               <div className="col-span-4 py-8 text-center text-sm text-muted-foreground">
-                No icons found for "{search}"
+                No icons found for &quot;{search}&quot;
               </div>
             )}
           </div>

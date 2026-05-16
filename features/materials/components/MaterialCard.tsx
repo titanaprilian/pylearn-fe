@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { EditMaterialDialog } from "./EditMaterialDialog";
 import { DeleteMaterialDialog } from "./DeleteMaterialDialog";
 import Link from "next/link";
+import { useAuth } from "@/features/auth";
 
 interface MaterialCardProps {
   material: Material;
@@ -26,6 +27,8 @@ interface MaterialCardProps {
 
 export function MaterialCard({ material }: MaterialCardProps) {
   const t = useTranslations();
+  const { user } = useAuth();
+  const isMahasiswa = user?.roleName?.toLowerCase() === "mahasiswa";
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
@@ -108,36 +111,41 @@ export function MaterialCard({ material }: MaterialCardProps) {
                 <Eye className="h-4 w-4 text-branding-dark" />
               </Link>
             </Button>
-            <Button
-              variant="secondary"
-              size="icon"
-              className="h-8 w-8 rounded-full shadow-sm bg-background/80 backdrop-blur border hover:bg-background"
-              asChild
-            >
-              <Link
-                href={`/materials/${material.id}/quiz?title=${encodeURIComponent(
-                  material.title
-                )}`}
-              >
-                <ClipboardCheck className="h-4 w-4 text-branding-dark" />
-              </Link>
-            </Button>
-            <Button
-              variant="secondary"
-              size="icon"
-              className="h-8 w-8 rounded-full shadow-sm bg-background/80 backdrop-blur border hover:bg-background"
-              onClick={() => setIsEditDialogOpen(true)}
-            >
-              <Pencil className="h-4 w-4 text-branding-dark" />
-            </Button>
-            <Button
-              variant="secondary"
-              size="icon"
-              className="h-8 w-8 rounded-full shadow-sm bg-background/80 backdrop-blur border hover:bg-destructive hover:text-destructive-foreground transition-colors"
-              onClick={() => setIsDeleteDialogOpen(true)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+
+            {!isMahasiswa && (
+              <>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="h-8 w-8 rounded-full shadow-sm bg-background/80 backdrop-blur border hover:bg-background"
+                  asChild
+                >
+                  <Link
+                    href={`/materials/${material.id}/quiz?title=${encodeURIComponent(
+                      material.title
+                    )}`}
+                  >
+                    <ClipboardCheck className="h-4 w-4 text-branding-dark" />
+                  </Link>
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="h-8 w-8 rounded-full shadow-sm bg-background/80 backdrop-blur border hover:bg-background"
+                  onClick={() => setIsEditDialogOpen(true)}
+                >
+                  <Pencil className="h-4 w-4 text-branding-dark" />
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="h-8 w-8 rounded-full shadow-sm bg-background/80 backdrop-blur border hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </Card>

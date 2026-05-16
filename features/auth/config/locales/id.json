@@ -12,8 +12,8 @@
     "welcomeTitle": "Selamat Datang",
     "welcomeDescription": "Masukkan NIK Anda di bawah untuk masuk ke akun Anda.",
     "userId": {
-      "label": "NIK",
-      "placeholder": "Masukkan NIK Anda"
+      "label": "NIK/NIM",
+      "placeholder": "Masukkan NIK/NIM Anda"
     },
     "password": {
       "label": "Kata Sandi",

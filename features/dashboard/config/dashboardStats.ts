@@ -14,13 +14,7 @@ export type DashboardStatCard = {
   icon: LucideIcon;
   color?: StatCardColor;
   descriptionKey?: string;
-  dataKey: keyof {
-    totalUsers: number;
-    activeUsers: number;
-    inactiveUsers: number;
-    totalRoles: number;
-    totalFeatures: number;
-  };
+  dataKey: string;
 };
 
 export const statCardColorStyles: Record<StatCardColor, string> = {

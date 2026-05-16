@@ -1,16 +1,15 @@
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  dashboardStatsConfig,
   DashboardStatCard,
   statCardColorStyles,
 } from "@features/dashboard/config/dashboardStats";
 import { useTranslations } from "@/lib/i18n/useTranslation";
-import { DashboardData } from "../types";
 
 const DEFAULT_COLOR = "blue";
 
 interface DashboardStatsProps {
-  data?: DashboardData;
+  data?: any;
+  config: DashboardStatCard[];
 }
 
 const StatCard = ({ card, value }: { card: DashboardStatCard; value?: number }) => {
@@ -20,6 +19,8 @@ const StatCard = ({ card, value }: { card: DashboardStatCard; value?: number }) 
     statCardColorStyles[card.color || DEFAULT_COLOR] ||
     statCardColorStyles[DEFAULT_COLOR];
 
+  const label = card.titleKey.includes(".") ? t(card.titleKey) : card.titleKey;
+
   return (
     <Card className="bg-white transition-all hover:-translate-y-1 hover:shadow-md">
       <CardContent className="flex items-center gap-4 py-5">
@@ -28,11 +29,13 @@ const StatCard = ({ card, value }: { card: DashboardStatCard; value?: number }) 
         </div>
         <div>
           <p className="text-sm font-medium text-muted-foreground">
-            {t(card.titleKey)}
+            {label}
           </p>
           <p className="text-2xl font-bold">{value ?? "-"}</p>
           {card.descriptionKey && (
-            <p className="text-xs text-muted-foreground">{t(card.descriptionKey)}</p>
+            <p className="text-xs text-muted-foreground">
+              {card.descriptionKey.includes(".") ? t(card.descriptionKey) : card.descriptionKey}
+            </p>
           )}
         </div>
       </CardContent>
@@ -40,10 +43,10 @@ const StatCard = ({ card, value }: { card: DashboardStatCard; value?: number }) 
   );
 };
 
-export function DashboardStats({ data }: DashboardStatsProps) {
+export function DashboardStats({ data, config }: DashboardStatsProps) {
   return (
     <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {dashboardStatsConfig.map((card, index) => (
+      {config.map((card, index) => (
         <StatCard 
           key={index} 
           card={card} 

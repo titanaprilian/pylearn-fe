@@ -4,10 +4,17 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@features/auth/context/AuthProvider";
 import { fetchDashboard } from "../services/dashboardApi";
 import { DashboardData } from "../types";
+import {
+  getLecturerDashboard,
+  getStudentDashboard,
+} from "../services/dashboardApi";
+import { LecturerDashboardData, StudentDashboardData } from "../types";
 
 export const dashboardKeys = {
   all: ["dashboard"] as const,
   detail: () => [...dashboardKeys.all, "detail"] as const,
+  lecturer: () => [...dashboardKeys.all, "lecturer"] as const,
+  student: () => [...dashboardKeys.all, "student"] as const,
 };
 
 export function useFetchDashboard() {
@@ -17,5 +24,25 @@ export function useFetchDashboard() {
     queryKey: dashboardKeys.detail(),
     queryFn: fetchDashboard,
     enabled: !!user && !isLoading,
+  });
+}
+
+export function useFetchLecturerDashboard() {
+  const { user, isLoading: isAuthLoading } = useAuth();
+
+  return useQuery<LecturerDashboardData>({
+    queryKey: dashboardKeys.lecturer(),
+    queryFn: getLecturerDashboard,
+    enabled: !!user && !isAuthLoading,
+  });
+}
+
+export function useFetchStudentDashboard() {
+  const { user, isLoading: isAuthLoading } = useAuth();
+
+  return useQuery<StudentDashboardData>({
+    queryKey: dashboardKeys.student(),
+    queryFn: getStudentDashboard,
+    enabled: !!user && !isAuthLoading,
   });
 }

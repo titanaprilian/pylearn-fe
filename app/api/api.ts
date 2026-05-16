@@ -28,6 +28,8 @@ export const API_ENDPOINTS = {
   },
   DASHBOARD: {
     LIST: `${API_URL}/dashboard`,
+    DOSEN: () => `${API_URL}/dashboard/dosen`,
+    MAHASISWA: () => `${API_URL}/dashboard/mahasiswa`,
   },
   MATERIALS: {
     LIST: `${API_URL}/materials`,
