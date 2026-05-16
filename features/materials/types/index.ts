@@ -49,7 +49,7 @@ export interface CreateMaterialRequest {
   file?: File; // For PDF uploads
 }
 
-export interface UpdateMaterialRequest extends Partial<CreateMaterialRequest> {}
+export type UpdateMaterialRequest = Partial<CreateMaterialRequest>;
 
 export interface MaterialsResponse {
   data: Material[];

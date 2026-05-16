@@ -2,9 +2,6 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl"; // Sesuaikan jika menggunakan i18n lain
-import { useForm } from "react-hook-form";
-import { useState } from "react";
 
 import { useFetchMaterialById } from "@/features/materials/hooks/useMaterials"; // Sesuaikan path import Anda
 import { useFetchQuizLevelsByMaterialId } from "@/features/quizzes/hooks/useQuizLevels";
@@ -25,8 +22,19 @@ import {
   Calendar,
   Play,
   ArrowRight,
+  ExternalLink,
 } from "lucide-react";
 import { useAuth } from "@/features/auth";
+import dynamic from "next/dynamic";
+import { API_URL } from "@/app/api/api";
+
+const PdfViewer = dynamic(
+  () => import("./PdfViewer").then((mod) => mod.PdfViewer),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-[600px] w-full" />,
+  },
+);
 
 // Mocking component jika belum diimport
 const HtmlRenderer = ({ content }: { content: string }) => (
@@ -45,6 +53,7 @@ export function MaterialDetailView({ id }: MaterialDetailViewProps) {
 
   // 1. Fetch data materi dan tingkatan level kuis
   const { data: material, isLoading } = useFetchMaterialById(id);
+
   const { data: quizLevels, isLoading: isLevelsLoading } =
     useFetchQuizLevelsByMaterialId(id);
 
@@ -66,6 +75,17 @@ export function MaterialDetailView({ id }: MaterialDetailViewProps) {
   // 3. Gunakan hook useCreateQuizAttempt
   const { mutateAsync: createAttempt, isPending: isCreatingAttempt } =
     useCreateQuizAttempt();
+
+  // Resolve PDF URL
+  const pdfUrl =
+    material?.materialType === "file"
+      ? material.sourceUrl || material.content
+      : null;
+
+  const absolutePdfUrl =
+    pdfUrl && !pdfUrl.startsWith("http")
+      ? `${API_URL}${pdfUrl.startsWith("/") ? "" : "/"}${pdfUrl}`
+      : pdfUrl;
 
   // Handler dinamis untuk tombol kuis
   const handleQuizAction = async (
@@ -117,12 +137,27 @@ export function MaterialDetailView({ id }: MaterialDetailViewProps) {
 
   return (
     <div className="flex flex-col gap-6 p-6 max-w-4xl mx-auto">
-      <Button variant="ghost" size="sm" className="w-fit pl-0" asChild>
-        <Link href="/materials">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Kembali ke Daftar
-        </Link>
-      </Button>
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="sm" className="w-fit pl-0" asChild>
+          <Link href="/materials">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Kembali ke Daftar
+          </Link>
+        </Button>
+
+        {absolutePdfUrl && (
+          <Button variant="outline" size="sm" asChild>
+            <a
+              href={absolutePdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Open in Browser
+            </a>
+          </Button>
+        )}
+      </div>
 
       {/* HEADER PANEL MATERI */}
       <div className="flex flex-col gap-4">
@@ -172,7 +207,9 @@ export function MaterialDetailView({ id }: MaterialDetailViewProps) {
       {/* ISI KONTEN MATERI MODUL */}
       <Card>
         <CardContent className="p-6">
-          {material.content ? (
+          {absolutePdfUrl ? (
+            <PdfViewer url={absolutePdfUrl} />
+          ) : material.content ? (
             <HtmlRenderer content={material.content} />
           ) : (
             <p className="text-muted-foreground italic">Konten kosong</p>
