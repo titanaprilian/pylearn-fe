@@ -25,6 +25,7 @@ import {
   ExternalLink,
   CheckCircle,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { API_ENDPOINTS } from "@/app/api/api";
 
 const PdfViewer = dynamic(
