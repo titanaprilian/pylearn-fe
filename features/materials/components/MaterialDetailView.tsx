@@ -26,7 +26,6 @@ import {
   CheckCircle,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-import { API_URL } from "@/app/api/api";
 
 const PdfViewer = dynamic(
   () => import("./PdfViewer").then((mod) => mod.PdfViewer),
@@ -75,9 +74,12 @@ export function MaterialDetailView({ id }: MaterialDetailViewProps) {
       ? material.sourceUrl || material.content
       : null;
 
+  // Use NEXT_PUBLIC_API_URL to ensure the browser fetches the file from the public domain 
+  // (e.g., api.titanic.my.id) instead of the internal docker network (e.g., http://backend:4000)
+  const publicApiUrl = process.env.NEXT_PUBLIC_API_URL;
   const absolutePdfUrl =
     pdfUrl && !pdfUrl.startsWith("http")
-      ? `${API_URL}${pdfUrl.startsWith("/") ? "" : "/"}${pdfUrl}`
+      ? `${publicApiUrl}${pdfUrl.startsWith("/") ? "" : "/"}${pdfUrl}`
       : pdfUrl;
 
   // Handler dinamis untuk tombol kuis
