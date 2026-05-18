@@ -10,16 +10,23 @@ export async function PATCH(request: NextRequest, context: RouteParams) {
     const { id } = await context.params;
     const authHeader = request.headers.get("authorization");
     const acceptLanguage = request.headers.get("accept-language");
+    const contentType = request.headers.get("content-type");
+
+    // 1. Susun header secara dinamis seperti pada rute POST (/me)
+    const headers: Record<string, string> = {};
+
+    if (authHeader) headers["Authorization"] = authHeader;
+    if (acceptLanguage) headers["accept-language"] = acceptLanguage;
+    if (contentType) headers["Content-Type"] = contentType;
+
+    // 2. Baca payload sebagai ArrayBuffer agar aman saat menerima file biner maupun teks JSON
+    const bodyBuffer = await request.arrayBuffer();
 
     const response = await fetch(API_ENDPOINTS.MATERIALS.UPDATE(id), {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        ...(authHeader && { Authorization: authHeader }),
-        ...(acceptLanguage && { "accept-language": acceptLanguage }),
-      },
+      headers: headers,
       credentials: "include",
-      body: await request.text(),
+      body: bodyBuffer, // Mengirimkan buffer biner mentah ke backend utama
     });
 
     const data = await response.json();
@@ -30,6 +37,7 @@ export async function PATCH(request: NextRequest, context: RouteParams) {
 
     return NextResponse.json(data);
   } catch (error) {
+    console.error(`Material update integration error:`, error);
     return NextResponse.json(
       { message: "Unable to connect to server" },
       { status: 500 },
@@ -100,4 +108,3 @@ export async function GET(
     );
   }
 }
-
