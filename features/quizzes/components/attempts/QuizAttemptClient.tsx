@@ -38,10 +38,8 @@ export function QuizAttemptClient({ attemptId }: QuizAttemptClientProps) {
     useFetchQuizQuestionsForAttempt(quizLevelId || "");
 
   // Only fetch results if submitted
-  const { data: resultsResponse, isLoading: isResultsLoading } = 
+  const { data: results, isLoading: isResultsLoading } = 
     useFetchQuizAttemptResults(isSubmitted ? attemptId : "");
-
-  const results = resultsResponse?.data;
 
   const [answers, setAnswers] = useState<Record<string, string>>({});
 
