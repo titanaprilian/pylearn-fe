@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useFetchQuizAttemptDetail } from "../../hooks/useQuizAttempts";
+import { useFetchQuizAttemptDetail, useFetchQuizAttemptResults } from "../../hooks/useQuizAttempts";
 import {
   useSubmitQuizAttempt,
   useSubmitBulkStudentAnswers,
@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Loader2, CheckCircle, Clock, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { QuizResultView } from "./QuizResultView";
 
 interface QuizAttemptClientProps {
   attemptId: string;
@@ -24,14 +25,21 @@ export function QuizAttemptClient({ attemptId }: QuizAttemptClientProps) {
   const { data: attempt, isLoading: isAttemptLoading } =
     useFetchQuizAttemptDetail(attemptId);
 
+  const isSubmitted = !!attempt?.submittedAt;
+
   const quizLevelId = attempt?.quizLevelId;
   const { data: levelDetail, isLoading: isLevelLoading } =
     useFetchQuizLevelDetail(quizLevelId || "");
 
   const quizId = levelDetail?.quizId;
 
+  // Only fetch questions if not submitted
   const { data: questions, isLoading: isQuestionsLoading } =
     useFetchQuizQuestionsForAttempt(quizLevelId || "");
+
+  // Only fetch results if submitted
+  const { data: results, isLoading: isResultsLoading } = 
+    useFetchQuizAttemptResults(isSubmitted ? attemptId : "");
 
   const [answers, setAnswers] = useState<Record<string, string>>({});
 
@@ -105,8 +113,6 @@ export function QuizAttemptClient({ attemptId }: QuizAttemptClientProps) {
     );
   }
 
-  const isSubmitted = !!attempt.submittedAt;
-
   return (
     <div className="space-y-6 max-w-4xl mx-auto p-6">
       <Button
@@ -141,45 +147,49 @@ export function QuizAttemptClient({ attemptId }: QuizAttemptClientProps) {
         </CardHeader>
       </Card>
 
-      <div className="space-y-4">
-        {questions?.map((question, index) => (
-          <Card key={question.id}>
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  {/* Nomor Pertanyaan */}
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium mt-0.5">
-                    {index + 1}
-                  </span>
+      {isSubmitted ? (
+        <QuizResultView results={results} isLoading={isResultsLoading} />
+      ) : (
+        <div className="space-y-4">
+          {questions?.map((question, index) => (
+            <Card key={question.id}>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    {/* Nomor Pertanyaan */}
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium mt-0.5">
+                      {index + 1}
+                    </span>
 
-                  <div
-                    className="prose prose-sm max-w-none text-foreground font-medium leading-relaxed"
-                    dangerouslySetInnerHTML={{
-                      __html: question.questionText,
-                    }}
+                    <div
+                      className="prose prose-sm max-w-none text-foreground font-medium leading-relaxed"
+                      dangerouslySetInnerHTML={{
+                        __html: question.questionText,
+                      }}
+                    />
+                  </div>
+
+                  <Textarea
+                    placeholder="Tulis jawaban Anda di sini..."
+                    value={answers[question.id] || ""}
+                    onChange={(e) =>
+                      handleAnswerChange(question.id, e.target.value)
+                    }
+                    disabled={isSubmitted}
+                    className="min-h-[100px]"
                   />
-                </div>
 
-                <Textarea
-                  placeholder="Tulis jawaban Anda di sini..."
-                  value={answers[question.id] || ""}
-                  onChange={(e) =>
-                    handleAnswerChange(question.id, e.target.value)
-                  }
-                  disabled={isSubmitted}
-                  className="min-h-[100px]"
-                />
-
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    Max Score: {question.maxScore}
-                  </span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Max Score: {question.maxScore}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {!isSubmitted && questions && questions.length > 0 && (
         <div className="flex justify-end gap-3">
