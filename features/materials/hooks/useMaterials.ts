@@ -59,9 +59,14 @@ export function useUpdateMaterial() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateMaterialRequest }) =>
-      updateMaterial(id, data),
-    onSuccess: (data) => {
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: UpdateMaterialRequest | FormData;
+    }) => updateMaterial(id, data),
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: materialKeys.all });
       toast.success(data.message || "Material updated successfully");
     },

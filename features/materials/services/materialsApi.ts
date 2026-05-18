@@ -66,21 +66,40 @@ export async function createMaterial(
 
 export async function updateMaterial(
   id: string,
-  data: UpdateMaterialRequest,
+  data: UpdateMaterialRequest | FormData,
 ): Promise<{ material: Material; message: string }> {
-  const payload: Record<string, unknown> = {};
-  if (data.lecturerId !== undefined) payload.lecturerId = data.lecturerId;
-  if (data.title !== undefined) payload.title = data.title;
-  if (data.description !== undefined) payload.description = data.description;
-  if (data.content !== undefined) payload.content = data.content;
-  if (data.sourceUrl !== undefined) payload.sourceUrl = data.sourceUrl;
-  if (data.iconName !== undefined) payload.iconName = data.iconName;
-  if (data.isPublished !== undefined) payload.isPublished = data.isPublished;
+  let payload: unknown;
 
+  if (data instanceof FormData) {
+    payload = data;
+  } else {
+    // Jika data berupa objek JSON biasa, lakukan mapping properti seperti semula
+    const cleanPayload: Record<string, unknown> = {};
+    if (data.lecturerId !== undefined)
+      cleanPayload.lecturerId = data.lecturerId;
+    if (data.title !== undefined) cleanPayload.title = data.title;
+    if (data.description !== undefined)
+      cleanPayload.description = data.description;
+    if (data.content !== undefined) cleanPayload.content = data.content;
+    if (data.sourceUrl !== undefined) cleanPayload.sourceUrl = data.sourceUrl;
+    if (data.iconName !== undefined) cleanPayload.iconName = data.iconName;
+    if (data.isPublished !== undefined)
+      cleanPayload.isPublished = data.isPublished;
+
+    payload = cleanPayload;
+  }
+
+  // 2. Eksekusi PATCH request dengan header dinamis jika mendeteksi FormData
   const { data: result } = await ApiAxios.patch<{
     data: Material;
     message: string;
-  }>(`/materials/${id}`, payload);
+  }>(`/materials/${id}`, payload, {
+    headers: {
+      ...(data instanceof FormData && {
+        "Content-Type": "multipart/form-data",
+      }),
+    },
+  });
 
   return {
     material: result.data,
@@ -101,4 +120,3 @@ export async function deleteMaterial(
     message: data.message,
   };
 }
-
